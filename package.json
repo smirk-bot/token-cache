@@ -7,5 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@babel/runtime": "^7.29.2",
+    "crypto-js": "^4.2.0",
+    "rqlite-js": "^2.5.7"
+  }
 }
