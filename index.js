@@ -16,14 +16,14 @@ const reportError = (dataResults)=>{
 
 const init = async()=>{
   try{
-    let sql = `CREATE TABLE IF NOT EXISTS "bot_tokens_${NAME_SPACE}" (id TEXT PRIMARY KEY, data TEXT NOT NULL, ttl INTEGER)`
+    let sql = `CREATE TABLE IF NOT EXISTS "tokens_${NAME_SPACE}" (id TEXT PRIMARY KEY, data TEXT NOT NULL, ttl INTEGER)`
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
       reportError(dataResults)
       setTimeout(init, 5000)
       return
     }
-    log.info(`created rqlite table bot_tokens_${NAME_SPACE}`)
+    log.info(`created rqlite table tokens_${NAME_SPACE}`)
     BOT_CACHE_READY = true
   }catch(e){
     log.error(e)
@@ -46,7 +46,7 @@ async function getCache(key){
   try{
     if(!key || !CACHE_READY) return
 
-    let sql = `SELECT data FROM "bot_tokens_${NAME_SPACE}" WHERE id="${key.toString()}"`
+    let sql = `SELECT data FROM "tokens_${NAME_SPACE}" WHERE id="${key.toString()}"`
     let res = await dataApiClient.query(sql)
     if(res.hasError()){
       reportError(res)
@@ -66,7 +66,7 @@ async function setCache(key, val){
     let encryptedStr = encryptId(JSON.stringify(val), TOKEN_CACHE_KEY)
     if(!encryptedStr) return
     let sql = [
-      [`INSERT INTO "bot_tokens_${NAME_SPACE}" (id, data, ttl) VALUES(:id, :data, ${Date.now()}) ON CONFLICT(id) DO UPDATE set data=:data, ttl=${Date.now()}`, { id: key.toString(), data: encryptedStr }]
+      [`INSERT INTO "tokens_${NAME_SPACE}" (id, data, ttl) VALUES(:id, :data, ${Date.now()}) ON CONFLICT(id) DO UPDATE set data=:data, ttl=${Date.now()}`, { id: key.toString(), data: encryptedStr }]
     ]
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
@@ -82,7 +82,7 @@ async function delCache(key){
   try{
     if(!key || !CACHE_READY) return
 
-    let sql = `DELETE FROM "bot_tokens_${NAME_SPACE}" WHERE id="${key}"`
+    let sql = `DELETE FROM "tokens_${NAME_SPACE}" WHERE id="${key}"`
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
       reportError(dataResults)
